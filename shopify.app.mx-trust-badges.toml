@@ -1,0 +1,24 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "8df4298c40f265f20f365e21e8099819"
+name = "MX Trust Badges"
+application_url = "https://app1.appsdevelopment.in"
+embedded = true
+
+[webhooks]
+api_version = "2025-01"
+
+  [[webhooks.subscriptions]]
+  uri = "/api/webhooks"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+[auth]
+redirect_urls = [
+  "https://app1.appsdevelopment.in/auth/callback",
+  "https://app1.appsdevelopment.in/auth/shopify/callback",
+  "https://app1.appsdevelopment.in/api/auth/callback"
+]
+
+
+[pos]
+embedded = false

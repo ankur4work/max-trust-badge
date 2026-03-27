@@ -1,0 +1,53 @@
+.Polaris-Page {
+  padding: 20px;
+}
+
+.faqBlock {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faq .Polaris-Button .Polaris-Icon {
+  transition: transform 0.15s var(--p-ease-in-out);
+}
+
+.faq [aria-expanded="true"] .Polaris-Icon {
+  transform: rotate(180deg);
+}
+
+.faq .Polaris-Card__Section {
+  padding: 15px 10px;
+}
+
+.faq .Polaris-Button span {
+  width: 100%;
+}
+
+.faq .faqBlock span {
+  width: auto;
+  margin: 0;
+}
+
+.faq .Polaris-TextContainer {
+  padding: 20px 10px 10px;
+}
+
+.faq .Polaris-Stack__Item:last-child {
+  margin: 0 !important;
+}
+
+.setupCard {
+  width: 100%;
+}
+
+.Polaris-TopBar__LogoLink {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .Polaris-Page {
+    padding: 12px;
+  }
+}

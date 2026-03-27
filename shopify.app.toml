@@ -1,0 +1,36 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "46f57a68def3f65755a72d719e177e0f"
+name = "MX Trust Badges"
+application_url = "https://trust-badges.solnix.store"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "test321-8746.myshopify.com"
+
+[webhooks]
+api_version = "2026-01"
+
+  [[webhooks.subscriptions]]
+  uri = "/api/webhooks"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+[access_scopes]
+scopes = "write_products,read_products"
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [
+  "https://trust-badges.solnix.store/auth/callback",
+  "https://trust-badges.solnix.store/auth/shopify/callback",
+  "https://trust-badges.solnix.store/api/auth/callback"
+]
+
+[app_proxy]
+url = "https://trust-badges.solnix.store/api/scroll-to-top"
+subpath = "scroll-to-top"
+prefix = "apps"
+
+[pos]
+embedded = false
