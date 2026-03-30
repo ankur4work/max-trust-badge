@@ -30,7 +30,9 @@ const APP_NAMESPACE = "custom";
 const SHOP_META_KEY = "trust-badges";
 const APP_META_KEY = "mx-trust-badges-premium";
 
-const IS_TEST = process.env.NODE_ENV !== "production";
+const IS_BILLING_TEST =
+  process.env.SHOPIFY_BILLING_TEST === "true" ||
+  process.env.NODE_ENV !== "production";
 
 const HTTP_STATUS = {
   OK: 200,
@@ -88,7 +90,7 @@ const BillingService = {
     return await shopify.api.billing.check({
       session,
       plans: [PREMIUM_PLAN],
-      isTest: IS_TEST,
+      isTest: IS_BILLING_TEST,
     });
   },
 
@@ -96,7 +98,8 @@ const BillingService = {
     return await shopify.api.billing.request({
       session,
       plan: PREMIUM_PLAN,
-      isTest: IS_TEST,
+      isTest: IS_BILLING_TEST,
+      returnUrl: `${process.env.HOST}?shop=${session.shop}`,
     });
   },
 
@@ -328,6 +331,13 @@ app.get("/api/createSubscription", async (req, res) => {
       confirmationUrl,
     });
   } catch (err) {
+    console.error("Create subscription failed:", {
+      message: err.message,
+      stack: err.stack,
+      response: err.response,
+      errorData: err.errorData,
+    });
+
     const status =
       err.message === "Missing shop parameter"
         ? HTTP_STATUS.BAD_REQUEST
