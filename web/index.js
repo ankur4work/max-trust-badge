@@ -116,6 +116,20 @@ const SessionRepository = {
   },
 };
 
+const getStoredSessionForShop = async (shop) => {
+  if (!shop) {
+    throw new Error("Missing shop parameter");
+  }
+
+  const session = await SessionRepository.findByShop(shop);
+
+  if (!session) {
+    throw new Error("Session not found");
+  }
+
+  return session;
+};
+
 /* ------------------------------------------------ */
 /*               SUBSCRIPTION SERVICE                */
 /* ------------------------------------------------ */
@@ -291,19 +305,9 @@ app.get("/api/hasActiveSubscription", async (req, res) => {
   }
 });
 
-/* ------------------------------------------------ */
-/*            PROTECTED ROUTES (AUTH)                */
-/* ------------------------------------------------ */
-
-app.use("/api/*", shopify.validateAuthenticatedSession());
-
-/* ------------------------------------------------ */
-/*           CREATE SUBSCRIPTION ROUTE               */
-/* ------------------------------------------------ */
-
 app.get("/api/createSubscription", async (req, res) => {
   try {
-    const session = getSession(res);
+    const session = await getStoredSessionForShop(req.query.shop);
 
     const active = await BillingService.hasActivePlan(session);
 
@@ -324,17 +328,20 @@ app.get("/api/createSubscription", async (req, res) => {
       confirmationUrl,
     });
   } catch (err) {
-    handleError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
+    const status =
+      err.message === "Missing shop parameter"
+        ? HTTP_STATUS.BAD_REQUEST
+        : err.message === "Session not found"
+          ? HTTP_STATUS.UNAUTHORIZED
+          : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+
+    handleError(res, status, err.message);
   }
 });
 
-/* ------------------------------------------------ */
-/*             CANCEL SUBSCRIPTION ROUTE             */
-/* ------------------------------------------------ */
-
 app.get("/api/cancelSubscription", async (req, res) => {
   try {
-    const session = getSession(res);
+    const session = await getStoredSessionForShop(req.query.shop);
 
     const active = await BillingService.hasActivePlan(session);
 
@@ -352,13 +359,22 @@ app.get("/api/cancelSubscription", async (req, res) => {
       cancelledPlan: PREMIUM_PLAN,
     });
   } catch (err) {
-    handleError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
+    const status =
+      err.message === "Missing shop parameter"
+        ? HTTP_STATUS.BAD_REQUEST
+        : err.message === "Session not found"
+          ? HTTP_STATUS.UNAUTHORIZED
+          : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+
+    handleError(res, status, err.message);
   }
 });
 
 /* ------------------------------------------------ */
-/*           CHECK ACTIVE SUBSCRIPTION ROUTE         */
+/*            PROTECTED ROUTES (AUTH)                */
 /* ------------------------------------------------ */
+
+app.use("/api/*", shopify.validateAuthenticatedSession());
 
 /* ------------------------------------------------ */
 /*                FRONTEND SERVING                   */
