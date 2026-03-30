@@ -6,6 +6,9 @@ import react from "@vitejs/plugin-react";
 
 process.env = {...process.env, ...loadEnv("", process.cwd())};
 
+const frontendRoot = dirname(fileURLToPath(import.meta.url));
+const appBridgeCoreEsmPath = `${frontendRoot}/node_modules/@shopify/app-bridge-core/esm`;
+
 
 console.log("API key: ", process.env.SHOPIFY_API_KEY);
 console.log("Host: ", process.env.HOST);
@@ -49,13 +52,20 @@ if (host === "localhost") {
 }
 
 export default defineConfig({
-  root: dirname(fileURLToPath(import.meta.url)),
+  root: frontendRoot,
   plugins: [react()],
   define: {
     "process.env.SHOPIFY_API_KEY": JSON.stringify(process.env.SHOPIFY_API_KEY),
   },
   resolve: {
-    preserveSymlinks: true,
+    alias: [
+      {
+        // Older App Bridge packages import deep core modules that Vite 2 can
+        // leave as bare browser imports. Force them to resolve to the ESM files.
+        find: /^@shopify\/app-bridge-core\/(.*)$/,
+        replacement: `${appBridgeCoreEsmPath}/$1`,
+      },
+    ],
   },
   server: {
     host: "localhost",
