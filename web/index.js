@@ -254,6 +254,43 @@ app.get("/api/scroll-to-top/hasSubscription", async (req, res) => {
   }
 });
 
+app.get("/api/hasActiveSubscription", async (req, res) => {
+  try {
+    const { shop } = req.query;
+
+    if (!shop) {
+      return handleError(res, HTTP_STATUS.BAD_REQUEST, "Missing shop parameter");
+    }
+
+    const session = await SessionRepository.findByShop(shop);
+
+    if (!session) {
+      return handleError(res, HTTP_STATUS.UNAUTHORIZED, "Session not found");
+    }
+
+    const tier = await SubscriptionService.getTier(session);
+
+    if (tier === "free") {
+      await MetafieldService.updateShopMetafield(session, "free");
+
+      return res.send({
+        hasActiveSubscription: false,
+        tier,
+      });
+    }
+
+    await MetafieldService.ensureAppMetafield(session);
+    await MetafieldService.updateShopMetafield(session, "premium");
+
+    res.send({
+      hasActiveSubscription: true,
+      tier,
+    });
+  } catch (err) {
+    handleError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
+  }
+});
+
 /* ------------------------------------------------ */
 /*            PROTECTED ROUTES (AUTH)                */
 /* ------------------------------------------------ */
@@ -322,41 +359,6 @@ app.get("/api/cancelSubscription", async (req, res) => {
 /* ------------------------------------------------ */
 /*           CHECK ACTIVE SUBSCRIPTION ROUTE         */
 /* ------------------------------------------------ */
-
-app.get("/api/hasActiveSubscription", async (req, res) => {
-  try {
-    const session = getSession(res);
-
-    const tier = await SubscriptionService.getTier(session);
-
-    if (tier === "free") {
-      await MetafieldService.updateShopMetafield(session, "free");
-
-      return res.send({
-        hasActiveSubscription: false,
-      });
-    }
-
-    await MetafieldService.ensureAppMetafield(session);
-    await MetafieldService.updateShopMetafield(session, "premium");
-
-    res.send({
-      hasActiveSubscription: true,
-      tier,
-    });
-  } catch (err) {
-    handleError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
-  }
-});
-
-/* ------------------------------------------------ */
-/*                 SHOP INFO ROUTE                   */
-/* ------------------------------------------------ */
-
-app.get("/api/getshop", (req, res) => {
-  const session = getSession(res);
-  res.json({ shop: session?.shop || null });
-});
 
 /* ------------------------------------------------ */
 /*                FRONTEND SERVING                   */

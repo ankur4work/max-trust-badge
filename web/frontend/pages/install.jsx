@@ -8,22 +8,18 @@ import {
   Icon,
   Banner,
 } from "@shopify/polaris";
-import { ExternalMinor } from "@shopify/polaris-icons";
-import { useAuthenticatedFetch } from "../hooks";
+import { getEmbeddedAppShop, withEmbeddedAppParams } from "../utils";
 
 export default function Installation() {
-  const fetch = useAuthenticatedFetch();
   const [error, setError] = useState(null);
 
   const openThemeEditor = async () => {
     setError(null);
     try {
-      const response = await fetch("/api/getshop");
-      if (!response.ok) throw new Error("Could not detect shop domain");
-      const data = await response.json();
-      if (!data.shop) throw new Error("Shop domain is missing");
+      const shop = getEmbeddedAppShop();
+      if (!shop) throw new Error("Shop domain is missing");
       window.open(
-        `https://${data.shop}/admin/themes/current/editor?context=apps&activateAppId=b355dba7-d415-49dc-8399-11206b10c9ca/trust-badges-embed`,
+        `https://${shop}/admin/themes/current/editor?context=apps&activateAppId=b355dba7-d415-49dc-8399-11206b10c9ca/trust-badges-embed`,
         "_blank"
       );
     } catch (err) {
@@ -63,7 +59,7 @@ export default function Installation() {
       <Page
         title="Installation Guide"
         subtitle="Follow these steps to add trust badges to your store."
-        breadcrumbs={[{ content: "Home", url: "/" }]}
+        breadcrumbs={[{ content: "Home", url: withEmbeddedAppParams("/") }]}
       >
         {error && (
           <div style={{ marginBottom: 16 }}>

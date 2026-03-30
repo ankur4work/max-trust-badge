@@ -1,6 +1,7 @@
 import { authenticatedFetch } from "@shopify/app-bridge-utils";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { Redirect } from "@shopify/app-bridge/actions";
+import { getEmbeddedAppShop } from "../utils";
 
 /**
  * A hook that returns an auth-aware fetch function.
@@ -19,10 +20,30 @@ export function useAuthenticatedFetch() {
   const fetchFunction = authenticatedFetch(app);
 
   return async (uri, options) => {
-    const response = await fetchFunction(uri, options);
+    const response = await fetchFunction(addShopToRelativeUrl(uri), options);
     checkHeadersForReauthorization(response.headers, app);
     return response;
   };
+}
+
+function addShopToRelativeUrl(uri) {
+  if (typeof uri !== "string" || !uri.startsWith("/")) {
+    return uri;
+  }
+
+  const shop = getEmbeddedAppShop();
+
+  if (!shop) {
+    return uri;
+  }
+
+  const url = new URL(uri, "https://embedded-app.local");
+
+  if (!url.searchParams.has("shop")) {
+    url.searchParams.set("shop", shop);
+  }
+
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 function checkHeadersForReauthorization(headers, app) {
@@ -35,7 +56,7 @@ function checkHeadersForReauthorization(headers, app) {
     redirect.dispatch(
       Redirect.Action.REMOTE,
       authUrlHeader.startsWith("/")
-        ? `https://${window.location.host}${authUrlHeader}`
+        ? `https://${window.location.host}${addShopToRelativeUrl(authUrlHeader)}`
         : authUrlHeader
     );
   }

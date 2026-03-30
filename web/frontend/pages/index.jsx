@@ -1,36 +1,25 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Card,
   Page,
   Layout,
-  TextContainer,
   Button,
   Frame,
-  DisplayText,
   Toast,
   SkeletonBodyText,
   Banner,
-  Stack,
   Badge,
   Icon,
 } from "@shopify/polaris";
-import {
-  CircleTickMinor,
-  ExternalMinor,
-  PlayCircleMajor,
-} from "@shopify/polaris-icons";
-import { useAppQuery, useAuthenticatedFetch } from "../hooks";
-import { useAppBridge } from "@shopify/app-bridge-react";
-import { Redirect } from "@shopify/app-bridge/actions";
+import { CircleTickMinor, ExternalMinor } from "@shopify/polaris-icons";
+import { useAppQuery } from "../hooks";
 import { useNavigate } from "react-router-dom";
+import { getEmbeddedAppShop, withEmbeddedAppParams } from "../utils";
 
 export default function HomePage() {
   const [toastProps, setToastProps] = useState({ content: null, error: false });
   const [activateError, setActivateError] = useState(null);
 
-  const app = useAppBridge();
-  const fetch = useAuthenticatedFetch();
-  const redirect = Redirect.create(app);
   const navigate = useNavigate();
 
   const {
@@ -62,12 +51,10 @@ export default function HomePage() {
   const openThemeEditor = async () => {
     setActivateError(null);
     try {
-      const response = await fetch("/api/getshop");
-      if (!response.ok) throw new Error("Could not detect shop domain");
-      const data = await response.json();
-      if (!data.shop) throw new Error("Shop domain is missing");
+      const shop = getEmbeddedAppShop();
+      if (!shop) throw new Error("Shop domain is missing");
       window.open(
-        `https://${data.shop}/admin/themes/current/editor?context=apps&activateAppId=b355dba7-d415-49dc-8399-11206b10c9ca/trust-badges-embed`,
+        `https://${shop}/admin/themes/current/editor?context=apps&activateAppId=b355dba7-d415-49dc-8399-11206b10c9ca/trust-badges-embed`,
         "_blank"
       );
     } catch (error) {
@@ -80,12 +67,6 @@ export default function HomePage() {
       {...toastProps}
       onDismiss={() => setToastProps({ content: null, error: false })}
     />
-  );
-
-  const Tick = () => (
-    <span style={{ marginRight: 8, display: "inline-flex" }}>
-      <Icon source={CircleTickMinor} color="success" />
-    </span>
   );
 
   const features = [
@@ -127,7 +108,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <Button onClick={() => navigate("/pricing")}>
+                    <Button onClick={() => navigate(withEmbeddedAppParams("/pricing"))}>
                       {isPremium ? "Manage plan" : "Upgrade to Premium"}
                     </Button>
                     <Button primary onClick={openThemeEditor}>
@@ -251,7 +232,7 @@ export default function HomePage() {
                       <span>Open theme editor</span>
                     </div>
                   </Button>
-                  <Button fullWidth onClick={() => navigate("/pricing")}>
+                  <Button fullWidth onClick={() => navigate(withEmbeddedAppParams("/pricing"))}>
                     View pricing plans
                   </Button>
                 </div>

@@ -17,6 +17,7 @@ import { CircleTickMinor, CancelSmallMinor } from "@shopify/polaris-icons";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
+import { withEmbeddedAppParams } from "../utils";
 
 export default function Pricing() {
   const app = useAppBridge();
@@ -165,7 +166,7 @@ export default function Pricing() {
       <Page
         title="Plans & Pricing"
         subtitle="Choose the plan that works best for your store."
-        breadcrumbs={[{ content: "Home", url: "/" }]}
+        breadcrumbs={[{ content: "Home", url: withEmbeddedAppParams("/") }]}
       >
         {!!banner.msg && !!banner.status && (
           <div style={{ marginBottom: 16 }}>

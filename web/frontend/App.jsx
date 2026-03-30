@@ -7,6 +7,7 @@ import {
   QueryProvider,
   PolarisProvider,
 } from "./components";
+import { withEmbeddedAppParams } from "./utils";
 
 export default function App() {
   const pages = import.meta.globEager("./pages/**/!(*.test.[jt]sx)*.([jt]sx)");
@@ -18,8 +19,14 @@ export default function App() {
           <QueryProvider>
             <NavigationMenu
               navigationLinks={[
-                { label: "Pricing", destination: "/pricing" },
-                { label: "Installation", destination: "/install" },
+                {
+                  label: "Pricing",
+                  destination: withEmbeddedAppParams("/pricing"),
+                },
+                {
+                  label: "Installation",
+                  destination: withEmbeddedAppParams("/install"),
+                },
               ]}
             />
             <Routes pages={pages} />
