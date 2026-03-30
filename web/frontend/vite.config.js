@@ -5,6 +5,7 @@ import https from "https";
 import react from "@vitejs/plugin-react";
 
 process.env = {...process.env, ...loadEnv("", process.cwd())};
+process.env.VITE_SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY;
 
 const frontendRoot = dirname(fileURLToPath(import.meta.url));
 const appBridgeCoreEsmPath = `${frontendRoot}/node_modules/@shopify/app-bridge-core/esm`;
