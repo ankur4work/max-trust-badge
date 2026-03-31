@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "8df4298c40f265f20f365e21e8099819"
-name = "MX Trust Badges"
+name = "Trust Badge Pro"
 application_url = "https://app1.appsdevelopment.in"
 embedded = true
 
