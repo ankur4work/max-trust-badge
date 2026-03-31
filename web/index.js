@@ -395,10 +395,15 @@ app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
+  const indexHtml = readFileSync(join(STATIC_PATH, "index.html"), "utf8").replace(
+    /%VITE_SHOPIFY_API_KEY%/g,
+    process.env.SHOPIFY_API_KEY || ""
+  );
+
   res
     .status(200)
     .set("Content-Type", "text/html")
-    .send(readFileSync(join(STATIC_PATH, "index.html")));
+    .send(indexHtml);
 });
 
 app.listen(PORT, () =>
