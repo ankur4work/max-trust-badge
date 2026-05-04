@@ -18,14 +18,20 @@ const billingConfig = {
   },
 };
 
+const HOST = process.env.HOST || "";
+if (!HOST) {
+  console.error("FATAL: HOST environment variable is required");
+  process.exit(1);
+}
+
 const shopify = shopifyApp({
   api: {
     apiVersion: LATEST_API_VERSION,
     restResources,
     apiKey: process.env.SHOPIFY_API_KEY,
     apiSecretKey: process.env.SHOPIFY_API_SECRET,
-    hostName: process.env.HOST.replace(/https?:\/\//, ""),
-    scopes: process.env.SCOPES.split(","),
+    hostName: HOST.replace(/https?:\/\//, ""),
+    scopes: (process.env.SCOPES || "write_products,read_products").split(","),
     billing: billingConfig, // or replace with billingConfig above to enable example billing
   },
   auth: {
